@@ -8,9 +8,9 @@ namespace ConsoleApplication1
 {
     class Program
     {
-        statis void Main(string[] args)
+        static void Main(string[] args)
         {
-            
+
         }
     }
 }
