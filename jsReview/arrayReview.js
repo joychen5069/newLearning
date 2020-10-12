@@ -8,7 +8,6 @@ function arrayManipulation(n, queries) {
     for (let i = 0; i < queries.length; i++) {
         //start of query
         let start = queries[i][0];
-        console.log("start", start)
         //end of query (ALL INCLUSIVE)
         let end = queries[i][1];
         
@@ -21,7 +20,6 @@ function arrayManipulation(n, queries) {
                 array[j]+= numberToAdd
             }
         }
-        console.log(array)
     }
 
     //then after i finish all the queries, i would find the greatest value in the array and return it
