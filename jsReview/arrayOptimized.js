@@ -1,19 +1,28 @@
 //OPTIMIZE THIS
 
 function arrayManipulation(n, queries) {
-    let array = new Array(n).fill(0);
-    for (let i = 0; i < queries.length; i++) {
-        let start = queries[i][0];
-        let end = queries[i][1];
-        let numberToAdd = queries[i][2];
-        for (let j = 0; j < n; j++) {
-            let index = j + 1;
-            if (index >= start && index <= end) {
-                array[j] += numberToAdd
-            }
-        }
-    }
-    console.log("MAX : ", Math.max(...array))
+    let array = Array(n + 1);
+    console.log(array)
+    let max = 0,
+    current = 0;
+    queries.forEach(([startRange, endRange, value]) => {
+         array[startRange] = array[startRange] || { start: 0, end: 0 };
+         array[endRange] = array[endRange] || { start: 0, end: 0 };
+         array[startRange].start += value;
+         array[endRange].end += value;
+     });
+    
+    array.forEach((cell) => {
+       if (cell) {
+           console.log
+         current += cell.start;
+         if (current > max) {
+            max = current;
+         }
+         current -= cell.end;
+     }
+   });
+ return max;
 }
 let a = 5;
 let b = [
