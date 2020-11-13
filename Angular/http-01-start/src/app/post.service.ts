@@ -1,10 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators'
+import { Subject, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators'
 import { Post } from './post.model';
 
 @Injectable({ providedIn: 'root' })
+
 export class PostService {
+    error = new Subject<string>();
 
     constructor(private http: HttpClient) { }
 
@@ -15,12 +18,16 @@ export class PostService {
             'https://udemy-learning-b5e36.firebaseio.com/posts.json', postData
         ).subscribe(responseData => {
             console.log(responseData)
+        }, error =>{
+            this.error.next(error.message)
         })
     }
 
     fetchPosts() {
        return this.http.get<{ [key: string]: Post }>(
-            'https://udemy-learning-b5e36.firebaseio.com/posts.json'
+            'https://udemy-learning-b5e36.firebaseio.com/posts.json', {
+                headers:new HttpHeaders({'Custom-Header': 'Hello'})
+            }
         ).pipe(map(responseData => {
             const postsArray: Post[] = [];
             for (const key in responseData) {
@@ -29,6 +36,9 @@ export class PostService {
                 }
             }
             return postsArray
+        }),
+        catchError(errorRes=>{
+            return throwError(errorRes);
         }))          
     }
 
