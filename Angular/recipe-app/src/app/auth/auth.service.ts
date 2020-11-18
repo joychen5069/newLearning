@@ -1,10 +1,10 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import { throwError, BehaviorSubject } from 'rxjs';
+
 import { User } from './user.model';
-// import { process } from 'dotenv'
 
 export interface AuthResponseData {
   kind: string;
@@ -24,19 +24,18 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {}
 
   signup(email: string, password: string) {
-    // const APIKey=process.env.FIREBASE_API_KEY
     return this.http
       .post<AuthResponseData>(
         'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyCZWeU-mikDwKffhsxiuA4UxnkMr8rUpS4',
         {
           email: email,
           password: password,
-          returnSecureToken: true,
+          returnSecureToken: true
         }
       )
       .pipe(
         catchError(this.handleError),
-        tap((resData) => {
+        tap(resData => {
           this.handleAuthentication(
             resData.email,
             resData.localId,
@@ -50,16 +49,16 @@ export class AuthService {
   login(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
-        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCZWeU-mikDwKffhsxiuA4UxnkMr8rUpS4',
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyCZWeU-mikDwKffhsxiuA4UxnkMr8rUpS4',
         {
           email: email,
           password: password,
-          returnSecureToken: true,
+          returnSecureToken: true
         }
       )
       .pipe(
         catchError(this.handleError),
-        tap((resData) => {
+        tap(resData => {
           this.handleAuthentication(
             resData.email,
             resData.localId,
@@ -75,22 +74,25 @@ export class AuthService {
       email: string;
       id: string;
       _token: string;
-      _toeknExpirationDate: string;
+      _tokenExpirationDate: string;
     } = JSON.parse(localStorage.getItem('userData'));
     if (!userData) {
       return;
     }
+
     const loadedUser = new User(
       userData.email,
       userData.id,
       userData._token,
-      new Date(userData._toeknExpirationDate)
+      new Date(userData._tokenExpirationDate)
     );
 
-    if(loadedUser.token){
+    if (loadedUser.token) {
       this.user.next(loadedUser);
-      const expirationDuration = new Date(userData._toeknExpirationDate).getTime() - new Date().getTime()
-      this.autoLogout(expirationDuration)
+      const expirationDuration =
+        new Date(userData._tokenExpirationDate).getTime() -
+        new Date().getTime();
+      this.autoLogout(expirationDuration);
     }
   }
 
@@ -98,16 +100,16 @@ export class AuthService {
     this.user.next(null);
     this.router.navigate(['/auth']);
     localStorage.removeItem('userData');
-    if(this.tokenExpirationTimer){
-      clearTimeout(this.tokenExpirationTimer)
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
     }
-    this.tokenExpirationTimer = null
+    this.tokenExpirationTimer = null;
   }
 
-  autoLogout(expirationDuration: number){
-    this.tokenExpirationTimer = setTimeout(()=>{
-      this.logout
-    }, expirationDuration)
+  autoLogout(expirationDuration: number) {
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
   }
 
   private handleAuthentication(
@@ -119,24 +121,25 @@ export class AuthService {
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
-    this.autoLogout(expiresIn * 1000)
+    this.autoLogout(expiresIn * 1000);
     localStorage.setItem('userData', JSON.stringify(user));
   }
 
   private handleError(errorRes: HttpErrorResponse) {
-    let errorMessage = 'An unknown error occurred';
+    let errorMessage = 'An unknown error occurred!';
     if (!errorRes.error || !errorRes.error.error) {
       return throwError(errorMessage);
     }
     switch (errorRes.error.error.message) {
       case 'EMAIL_EXISTS':
-        errorMessage = 'this email already exists';
+        errorMessage = 'This email exists already';
         break;
       case 'EMAIL_NOT_FOUND':
-        errorMessage = 'this email does not exists';
+        errorMessage = 'This email does not exist.';
         break;
       case 'INVALID_PASSWORD':
-        errorMessage = 'password incorrect';
+        errorMessage = 'This password is not correct.';
+        break;
     }
     return throwError(errorMessage);
   }
