@@ -14,6 +14,6 @@ import { ShoppingListComponent } from './shopping-list.component';
     ]),
     FormsModule,
     SharedModule,
-  ],
+  ]
 })
 export class ShoppingListModules {}
